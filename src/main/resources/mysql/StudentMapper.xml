@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.studentdemo.mapper.StudentMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="StudentGpaResultMap" type="com.demo.studentdemo.VO.StudentGpaVO">
+        <result property="studentId" column="studentId"/>
+        <result property="studentName" column="studentName"/>
+        <result property="gpa" column="GPA"/>
+    </resultMap>
+
+    <!-- 查询学生GPA -->
+    <select id="selectStudentGpa" resultMap="StudentGpaResultMap">
+        SELECT
+            s.student_id AS studentId,
+            s.name AS studentName,
+            AVG(
+                    CASE
+                        WHEN g.score >= 90 THEN 4.0
+                        WHEN g.score >= 80 THEN 3.0
+                        WHEN g.score >= 70 THEN 2.0
+                        WHEN g.score >= 60 THEN 1.0
+                        ELSE 0.0
+                        END
+            ) AS GPA
+        FROM
+            t_student s
+                INNER JOIN
+            t_grade g ON s.student_id = g.student_id
+        WHERE
+        s.student_id = #{studentId}
+        GROUP BY
+            s.student_id, s.name
+    </select>
+</mapper>
