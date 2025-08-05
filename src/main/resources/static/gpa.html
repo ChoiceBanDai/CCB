@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+    <title>GPA查询系统</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 40px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        input, button {
+            padding: 12px;
+            font-size: 16px;
+        }
+        input {
+            width: 70%;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            outline: none;
+        }
+        button {
+            width: 28%;
+            background: #1890ff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #40a9ff;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px dashed #ddd;
+            border-radius: 6px;
+            background: #f9f9f9;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎓 GPA 查询</h1>
+
+    <div>
+        <input type="text" id="studentId" placeholder="请输入学生学号" />
+        <button onclick="queryGpa()">查询</button>
+    </div>
+
+    <div id="result"></div>
+</div>
+
+<script>
+    async function queryGpa() {
+        const studentId = document.getElementById("studentId").value.trim();
+        const resultDiv = document.getElementById("result");
+
+        resultDiv.innerHTML = ''; // 清空上次结果
+
+        if (!studentId) {
+            resultDiv.innerHTML = '<p class="error">⚠️ 请输入学生学号！</p>';
+            return;
+        }
+
+        try {
+            const response = await fetch('/student/gpa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ studentId: studentId })
+            });
+
+            if (!response.ok) {
+                throw new Error("学号不存在或系统错误");
+            }
+
+            const data = await response.json();
+            resultDiv.innerHTML = `
+          <p><strong>姓名：</strong>${data.studentName}</p>
+          <p><strong>学号：</strong>${data.studentId}</p>
+          <p><strong>GPA：</strong><strong style="color:#1890ff;font-size:1.2em;">${data.gpa}</strong></p>
+        `;
+        } catch (err) {
+            resultDiv.innerHTML = `<p class="error">❌ 错误：${err.message}</p>`;
+        }
+    }
+
+    // 支持回车查询
+    document.getElementById("studentId").addEventListener("keypress", e => {
+        if (e.key === "Enter") queryGpa();
+    });
+</script>
+
+</body>
+</html>
