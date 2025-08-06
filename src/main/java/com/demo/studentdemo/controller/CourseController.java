@@ -65,5 +65,79 @@ public class CourseController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * 根据ID获取学生信息
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<Course> getById(@PathVariable Long id) {
+        Course course = courseService.getById(id);
+        if (course != null) {
+            return ResponseEntity.ok(course);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * 添加学生
+     */
+    @PostMapping
+    public ResponseEntity<Course> add(@RequestBody Course course) {
+        // 设置创建时间和更新时间
+        LocalDateTime now = LocalDateTime.now();
+        course.setCreatedAt(now);
+        course.setUpdatedAt(now);
+        course.setCreatedBy("admin"); // 实际应用中应该从登录用户获取
+        course.setUpdatedBy("admin");
+
+        boolean success = courseService.save(course);
+        if (success) {
+            return ResponseEntity.ok(course);
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * 更新学生信息
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<Course> update(@PathVariable Long id, @RequestBody Course course) {
+        Course existingcourse = courseService.getById(id);
+        if (existingcourse == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        course.setId(id);
+        course.setUpdatedAt(LocalDateTime.now());
+        course.setUpdatedBy("admin"); // 实际应用中应该从登录用户获取
+        course.setCreatedAt(existingcourse.getCreatedAt());
+        course.setCreatedBy(existingcourse.getCreatedBy());
+
+        boolean success = courseService.updateById(course);
+        if (success) {
+            return ResponseEntity.ok(course);
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * 删除学生
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        boolean exists = courseService.getById(id) != null;
+        if (!exists) {
+            return ResponseEntity.notFound().build();
+        }
+
+        boolean success = courseService.removeById(id);
+        if (success) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 
 }
